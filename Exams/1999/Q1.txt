@@ -1,0 +1,51 @@
+Question 1 - 1999 Exam
+
+
+RELATIONAL SCHEMA:
+  Book(isbn:integer, title:string, publisher:string, year:integer) 
+  Author(isbn:integer, name:string, rank:integer)
+  Borrower(bid:integer, name:string, address:string)
+  Borrowings(isbn:integer, borrower:integer, whenTaken:date, whenReturned:date)
+
+a) Write a SQL query to show which books (title only) have multiple authors.
+
+   SELECT title FROM Book, Author
+    WHERE Book.isbn = Author.isbn
+      GROUP BY Book.isbn, Book.title
+        HAVING count(*) > 1;
+
+b) Write a SQL query to show which books (title only) have never been borrowed.
+
+   SELECT title FROM Book
+    WHERE NOT EXISTS (SELECT * FROM Borrowings bor WHERE bor.isbn=b.isbn);
+
+c) Write a SQL query to show which books (title onlu) are currently out on loan.
+
+  SELECT b.title FROM Book b, Borrowings bor
+    WHERE bor.isbn = b.isbn AND
+      WHERE bor.whenTaken IS NOT NULL AND
+      WHERE bor.whenReturned IS NULL;
+
+d) Write a SQL query to list each overdue book (title) and borrower's name. 
+
+  SELECT b.title, o.name FROM Book b, Borrower o, Borrowings bor
+    WHERE bor.isbn = b.isbn AND
+          bor.borrower = o.bid AND
+          today > bor.whenTaken + 14 AND
+          bor.whenReturned IS NULL;
+
+e) Write a SQL query to list borrowers(name, address) who always return books late.
+
+  SELECT p.name, p.address FROM Borrower p
+    WHERE NOT EXISTS(
+        (SELECT * FROM Borrowings WHERE Borrower=p.id)
+        minus
+        (SELECT * FROM Borrowings WHERE Borrower=p.id AND
+        (whenReturned > whenTaken+14 or (today > r.whenTaken+14 and r.whenReturned = null))
+        );
+
+f) Write a PL/SQL to show entire catalog in book title order
+
+    create or replace procedure books is
+
+

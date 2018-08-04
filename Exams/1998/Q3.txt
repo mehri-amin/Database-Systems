@@ -1,0 +1,67 @@
+Entities: Readers, Doccuments, Keywords
+Each Reader has a profile consiting of a set of keywords
+Each document can be represented by a set of its keywords
+
+Relational Schema:
+  Reader(rid#: integer, name:string, email:string)
+  Keyword(wid#: integer, word:string)
+  Document(did#: integer, url:string, modified:date)
+  Interested(reader#:integer, keyword#:integer)
+  Contains(document#:integer, keyword#:integer)
+
+a) Write SQL Statements to create Oracle tables for the 
+   Reader, Document, and Interested relations.
+
+   create table Reader(
+      rid#  integer primary key,
+      name  varchar(20)
+   );
+
+   create table Document(
+      did#  integer primary key,
+      url   varchar(50),
+      modified  date
+   );
+
+   create table Interested(
+      reader# integer foreign key references Reader(rid#),
+      keyword#  integer foreign key references Keyword(wid#)
+   );
+
+b) Write a SQL update statement that changes database to indicate
+   that document #35123 was just modified. 
+
+   UPDATE Document
+   SET modified = SYSDATE
+   WHERE did# = 35123;
+
+c) Write a SQL view that gives all new documents, where new means
+   document was modified within last 2 days. 
+
+   CREATE VIEW newDocuments AS
+   SELECT * did# FROM Document
+   WHERE SYSDATE - modified < 2; 
+
+d) Write a SQL query that finds all new documents that might be
+   of interest to reader #197.
+
+   SELECT url FROM newDocuments d, Interested i, Contains c
+    WHERE i.reader = #197 and
+          i.keyword# = c.keyword# and
+          c.document = d.did#;
+
+e) Write a SQL query that finds all pairs of readers that have similar interests,
+   where similar interestes mean they share more than three keywords in their 
+   profiles.
+
+   SELECT r1.name, r2.name FROM Reader r1, Reader r2
+    WHERE r1.rid# < r2.rid# and
+      (SELECT count(*) FROM
+          ((SELECT keyword# from Interested where reader#=r1.rid#)
+            INTERSECT
+           (SELECT keyword# from Interested where reader=r2.rid#)
+          )
+      ) > 3;
+
+
+

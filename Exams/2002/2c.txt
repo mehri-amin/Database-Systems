@@ -1,0 +1,60 @@
+Express the relational model as a set of PostgreSQL create table statements.
+
+create table Person(
+  pid   integer,
+  name  varchar(20), -- assume 20 is long enough
+  street varchar(20),
+  city  varchar(20),
+  primary key(pid)
+);
+
+create table Employee(
+  pid integer foreign key references Person(pid),
+  eid integer,
+  salary real check (salary > 0),
+  phone varchar(20)
+  worksIn varchar(20) foreign key references Branch(bname).
+  primary key(eid)
+);
+
+create table Customer(
+  pid integer foreign key references Person(pid),
+  cid integer,
+  primary key(pid)
+);
+
+create table Customerdate(
+  pid integer foreign key references Person(pid),
+  when date,
+  reason varchar(40),
+  primary key(pid, when, reason)
+);
+
+create table Branch(
+  bname varchar(20),
+  city  varchar(20),
+  Manager integer foreign key references Employee(eid),
+  primary key(bname)
+);
+
+create table Account(
+  acctNo  integer,
+  balance real,
+  heldAt  varchar(20) foreign key references Branch(bname)
+  primary key(acctNo)
+);
+
+create table CustomerAccount(
+  customer integer foreign key references Customer(cid),
+  account integer foreign key references Account(acctNo),
+  primary key(cid, account)
+);
+
+create table Transaction(
+  customer  integer foreign key references Customer(cid),
+  account   integer foreign key references Account(acctNo),
+  type      varchar(10) check type in ('deposit, 'withdrawal'),
+  accessed  timestamp,
+  amount    real,
+  primary key(customer,account,type,accessed)
+);

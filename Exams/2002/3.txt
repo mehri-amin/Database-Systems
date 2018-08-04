@@ -1,0 +1,48 @@
+Employee(ename:string, street:string, city:string);
+Works(employee:string, company:string, salary:real);
+Company(cname:string, city:string);
+Manages(employee:string, manager-name:string);
+
+a) SELECT e.ename, e.street, e.city FROM Employee e
+   JOIN Works w ON (w.company = "First Bank Corporation") and
+                   (w.employee = e.ename)
+   WHERE (w.salary > 40000);
+
+b) SELECT e.ename FROM Employee e
+   JOIN Works w ON (w.employee = e.ename)
+   JOIN Company c ON (c.name = w.company)
+   WHERE (c.city = e.city);
+
+c) Update Works
+   Set salary = salary*1.10
+   WHERE employee in
+    (SELECT ename FROM Manages M, Works W
+      WHERE m.manager-name = w.employee and
+      w.company = 'First Bank Corp')
+
+d) Select w.employee FROM Works w
+    WHERE w.salary > (SELECT min(sbc.salary) FROM Works sbc
+                        where sbc.company = 'Small Bank Corp');
+
+e) Select c.cname from company c
+    where not exists
+      ((select city from Company where cname = 'Small Bank Corp')
+        except
+        (select city from Company where cname = c.cname))
+
+f) create view CoEmp as 
+      select company, count(employee) as numEmps
+      from Works
+      group by company;
+
+  select company from CoEmp where numEmps >= (Select max(numEmps) from CoEmp);
+
+g) select company from company group by company having avg(Salary) > 
+    (select avg(salary) from Work where company=First Bank Corp)
+
+
+   
+
+
+
+
